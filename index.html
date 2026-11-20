@@ -228,7 +228,7 @@
     text-shadow:0 1px 0 rgba(255,255,255,.8)}
   .talk-head p{margin:2px 0 0;font-size:11.5px;color:var(--ink-2);display:flex;align-items:center;gap:6px}
   .live-dot{width:5px;height:5px;border-radius:50%;background:#7fae8a;box-shadow:0 0 8px rgba(127,174,138,.9);animation:breathe 2.6s ease-in-out infinite}
-  .chat{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:18px 2px 8px;
+  .chat{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:18px 2px 18px;
     display:flex;flex-direction:column;gap:13px}
   .msg{display:flex;gap:10px;align-items:flex-start;max-width:100%}
   .msg.from-user{flex-direction:row-reverse}
@@ -900,82 +900,107 @@
 
   /* 倾诉回复：先判断“在说哪件事”，再判断“是什么感受”，最后接一句具体的话 */
   var TOPICS = [
-    { id: 'work', r: /工作|加班|上班|老板|领导|同事|项目|绩效|kpi|开会|客户|汇报|辞职|离职|裁员|面试|offer|打工|公司|考核|提成|求职|简历|应聘/i,
+    { id: 'work', label: '工作',
+      r: /工作|加班|上班|老板|领导|同事|项目|绩效|kpi|开会|客户|汇报|辞职|离职|裁员|面试|offer|打工|公司|考核|提成|求职|简历|应聘/i,
       variants: [
+        { r: /没过|没通过|被拒|失败|被刷|凉了/,
+          lines: ['面试没过，最容易怀疑自己。', '被拒一次，不代表你不行。'] },
         { r: /面试|求职|简历|应聘|offer|招聘|找工作/i,
-          lines: ['面试被拒，会让人怀疑自己。', '找工作这段时间，最熬人的是等消息。', '被拒一次，不代表你不行。'] },
+          lines: ['面试被拒，最先碎的是信心。', '等消息的日子，最磨人。', '被拒一次，不代表你不行。'] },
         { r: /加班|996|通宵|忙到|赶工|任务多|做不完/,
-          lines: ['加班到没力气，问题不在你不够努力。', '活儿一件压一件，谁都会烦。'] },
+          lines: ['加班到没力气，不是你不努力。', '活儿一件压一件，谁都会烦。'] },
         { r: /领导|老板|上司|同事|甩锅|背锅|批评|会议|汇报/,
           lines: ['被那样说，心里肯定堵。', '和同事处得累，最消耗人。'] }
       ],
-      lines: ['工作上的事，一件压一件。', '上班把人磨钝，是真的。'] },
-    { id: 'study', r: /考试|学习|作业|论文|成绩|考研|考公|复习|答辩|分数|挂科|老师|上课|留学|保研|刷题/,
+      lines: ['工作上的事，一件压一件。', '上班久了，人是会被磨钝的。', '在单位受的气，回家还跟着你。'],
+      questions: ['是今天发生的事吗？', '最让你堵的是哪一句？', '这情况是最近才这样，还是很久了？', '你更想解决事，还是先出口气？'],
+      acts: ['先离开工位五分钟。', '把最急的一件写下来，其余先放着。'] },
+    { id: 'study', label: '学习',
+      r: /考试|学习|作业|论文|成绩|考研|考公|复习|答辩|分数|挂科|老师|上课|留学|保研|刷题/,
       variants: [
         { r: /没考上|落榜|考砸|没通过|没过|失败|分数低|挂了/,
           lines: ['这次没成，不代表你不行。', '努力过却没结果，最伤人。'] },
         { r: /复习|备考|刷题|背书|冲刺/,
-          lines: ['复习到麻木，是很正常的反应。', '看不进去的时候，硬撑效率更低。'] },
+          lines: ['复习到麻木，是很正常的反应。', '看不进去还硬撑，效率只会更低。'] },
         { r: /答辩|论文|导师/,
-          lines: ['被答辩和论文夹着，最磨人。'] }
+          lines: ['被论文和答辩夹着，最磨人。'] }
       ],
-      lines: ['学不进去的时候，越逼自己越卡。', '一次成绩，说明不了你这个人。'] },
-    { id: 'family', r: /父母|爸妈|爸爸|妈妈|妈|爸|家里|家人|婆婆|公公|亲戚|回家|孩子|带娃|老公|老婆|结婚|催婚|长辈|吵架|吵|冷战|闹翻|翻脸/,
+      lines: ['学不进去的时候，越逼自己越卡。', '一次成绩，说明不了你这个人。'],
+      questions: ['是从什么时候开始卡住的？', '现在最怕的是哪一步？', '你给自己定的目标，会不会太紧了？', '要不要先把今天要做的减到一件？'],
+      acts: ['先合上书，去走十分钟。', '把任务拆成最小的一步，只做那一步。'] },
+    { id: 'family', label: '家里',
+      r: /父母|爸妈|爸爸|妈妈|妈|爸|家里|家人|婆婆|公公|亲戚|回家|孩子|带娃|老公|老婆|结婚|催婚|长辈|吵架|吵|冷战|闹翻|翻脸/,
       variants: [
         { r: /吵架|吵起来|冷战|闹翻|翻脸|骂|吼/,
-          lines: ['和最亲的人吵完，心里会一直悬着。', '吵完更难受，因为你还在乎。'] },
+          lines: ['和最亲的人吵完，心会一直悬着。', '吵完更难受，因为你还在乎。'] },
         { r: /催婚|相亲|安排|逼/,
-          lines: ['被催着做决定，很难不烦。', '被安排人生，谁都会想逃。'] }
+          lines: ['被催着做决定，真的很难不烦。', '被安排人生，谁都会想逃。'] }
       ],
-      lines: ['家里的话最不好躲，也最扎人。', '和最亲的人说不通，最憋。'] },
-    { id: 'love', r: /分手|失恋|前任|喜欢的人|暗恋|异地|表白|恋爱|男朋友|女朋友|对象|离婚|出轨|感情|暧昧/,
+      lines: ['家里的话最不好躲，也最扎人。', '和最亲的人说不通，最憋。', '亲人的一句话，能记很多年。'],
+      questions: ['对方是怎么说的？', '你们之前也这样吗？', '这件事里，你最委屈的是哪一点？', '现在还需要天天见面吗？'],
+      acts: ['先别在气头上回话。', '把想说的话写下来，不一定要发出去。'] },
+    { id: 'love', label: '感情',
+      r: /分手|失恋|前任|喜欢的人|暗恋|异地|表白|恋爱|男朋友|女朋友|对象|离婚|出轨|感情|暧昧/,
       variants: [
         { r: /分手|失恋|前任|离婚|出轨|离开/,
-          lines: ['被要分手，第一反应往往是懵的。', '这种疼是慢慢渗的，不会一下就好。'] },
+          lines: ['被提分手，第一反应往往是懵的。', '这种疼是慢慢渗的，不会一下就好。'] },
         { r: /喜欢|暗恋|表白|暧昧|异地/,
-          lines: ['喜欢一个人时的委屈，最难说出口。', '心里装着一个人，会特别累。'] }
+          lines: ['喜欢一个人的委屈，最难说出口。', '心里装着一个人，会特别累。'] }
       ],
-      lines: ['感情里的事，最不由人。'] },
-    { id: 'friend', r: /朋友|闺蜜|兄弟|同学|舍友|室友|被孤立|闹翻|绝交|聚会/,
-      lines: ['被朋友这样对待，心会凉一下。',
-              '关系里的失望，最难讲道理。',
-              '被身边人排除在外，很不好受。'] },
-    { id: 'body', r: /身体|生病|头疼|胃疼|发烧|医院|体检|吃药|月经|不舒服|犯病|疼得/,
-      lines: ['身体难受的时候，什么心情都撑不起来。',
-              '身上不舒服，情绪会跟着往下掉。',
-              '硬扛着身体，是最消耗人的。'] },
-    { id: 'money', r: /钱|工资|房租|贷款|花呗|欠款|穷|经济|存款|账单|还款/,
-      lines: ['钱的事压着，很难不慌。',
-              '手头紧的时候，连说话都要小心。',
-              '为钱发愁的滋味，最闷。'] },
-    { id: 'self', r: /自己|自卑|没用|讨厌自己|不够好|失败|比别人|长相|身材|年龄|很笨|不配|很糟糕/,
-      lines: ['对自己不满意的时候，最容易一个人往里钻。',
-              '你对自己的评价，比事实狠多了。',
-              '把自己说得一无是处，太不公平了。'] }
+      lines: ['感情里的事，最不由人。'],
+      questions: ['你更想留住，还是想放下？', '对方是什么时候开始变的？', '现在最难受的是不甘心，还是舍不得？', '身边有人知道这件事吗？'],
+      acts: ['今晚别做任何决定。', '先把想说的话写成一条，不必发出去。'] },
+    { id: 'friend', label: '朋友',
+      r: /朋友|闺蜜|兄弟|同学|舍友|室友|被孤立|绝交|聚会/,
+      lines: ['被朋友这样对待，心会凉一下。', '关系里的失望，最难讲道理。', '被身边人排除在外，很不好受。'],
+      questions: ['是发生了什么？', '你们认识多久了？', '你希望对方怎么对你？', '之后还想联系吗？'],
+      acts: ['先别急着解释。', '把界限说清楚，不必勉强自己。'] },
+    { id: 'body', label: '身体',
+      r: /身体|生病|头疼|胃疼|发烧|医院|体检|吃药|月经|不舒服|犯病|疼得/,
+      lines: ['身体难受的时候，什么心情都撑不起来。', '身上不舒服，情绪会跟着往下掉。', '硬扛着身体，最消耗人。'],
+      questions: ['去医院看过了吗？', '最近睡得好吗？', '这难受是一阵一阵，还是持续的？'],
+      acts: ['先躺一会儿，别硬撑。', '该看医生就去看，别拖。'] },
+    { id: 'money', label: '钱',
+      r: /钱|工资|房租|贷款|花呗|欠款|穷|经济|存款|账单|还款/,
+      lines: ['钱的事压着，很难不慌。', '手头紧的时候，连说话都小心。', '为钱发愁的滋味，最闷。'],
+      questions: ['差得多吗？', '这笔钱什么时候要用？', '家里人知道吗？'],
+      acts: ['先算清最急的一笔。', '把能拖的先拖一拖，先顾眼前。'] },
+    { id: 'self', label: '自己',
+      r: /自己|自卑|没用|讨厌自己|不够好|比别人|长相|身材|年龄|很笨|不配|很糟糕/,
+      lines: ['对自己不满意的时候，最容易一个人往里钻。', '你对自己的评价，比事实狠多了。', '把自己说得一无是处，太不公平。'],
+      questions: ['最不满意自己的是哪一点？', '这话最早是谁说给你听的？', '如果是朋友这样，你会怎么劝他？'],
+      acts: ['先别给自己下结论。', '把标准降一点，先做成一件小事。'] }
   ];
 
   var FEELINGS = [
     { id: 'tired', r: /累|疲惫|撑不住|没力气|受不了|乏力|好累|透支/,
-      alone: '累成这样，不是你不努力。',
-      acts: ['今天早点收工。', '先靠一会儿，别硬撑。', '先喝口水，缓一缓。'] },
+      alone: ['累成这样，不是你不努力。', '累到不想说话的时候，我懂。'],
+      acts: ['今天早点收工。', '先靠一会儿，别硬撑。', '先喝口水，缓一缓。'],
+      questions: ['最近一直在硬撑吗？', '今天有休息过吗？'] },
     { id: 'sad', r: /难过|伤心|想哭|哭了|低落|沮丧|失落|委屈|崩溃|难受|压抑|心疼|没考上|考砸|落榜|没通过|被拒|失败|闷|没劲|提不起/,
-      alone: '难过就是难过，不用硬撑。',
-      acts: ['想哭就哭，我听着。', '不用急着好起来。', '先别一个人憋着。'] },
+      alone: ['难过就是难过，不用硬撑。', '心里堵着，先别急着讲道理。'],
+      acts: ['想哭就哭，我听着。', '不用急着好起来。', '先别一个人憋着。'],
+      questions: ['这情绪是从什么时候开始的？', '想说说发生了什么吗？'] },
     { id: 'anxious', r: /焦虑|紧张|害怕|担心|慌|恐惧|压力|不安|心慌|焦躁/,
-      alone: '心里发紧的时候，很难松下来。',
-      acts: ['先只处理眼前一件。', '慢慢呼气，别急。', '别把还没发生的事先算上。'] },
+      alone: ['心里发紧的时候，很难松下来。', '不安的时候，人是会一直绷着的。'],
+      acts: ['先只处理眼前一件。', '慢慢呼气，别急。', '别把还没发生的事先算上。'],
+      questions: ['最担心的是哪一件事？', '身体有没有跟着紧起来？'] },
     { id: 'angry', r: /生气|气死|火大|烦死|讨厌|恶心|愤怒|不公平|太过分|坑人/,
-      alone: '被这样对待，生气很正常。',
-      acts: ['先骂两句，我听着。', '别自己咽下去。', '这事儿确实过分。'] },
+      alone: ['被这样对待，生气很正常。', '这口气憋着，确实难受。'],
+      acts: ['先骂两句，我听着。', '别自己咽下去。', '这事儿确实过分。'],
+      questions: ['是谁让你这么气？', '当时你有回他吗？'] },
     { id: 'lonely', r: /孤单|孤独|没人|一个人|寂寞|没有朋友|没人懂|没人理/,
-      alone: '一个人扛着，会特别冷。',
-      acts: ['我在，你说。', '想说话的时候就来。'] },
+      alone: ['一个人扛着，会特别冷。', '没人说话的时候，夜会特别长。'],
+      acts: ['我在，你说。', '想说话的时候就来。'],
+      questions: ['最近有和谁说过话吗？', '一个人待着的时候，最想做什么？'] },
     { id: 'lost', r: /迷茫|不知道|没方向|看不清|未来|意义|活着为什么|怎么办才好/,
-      alone: '看不清前面的时候，站一会儿也行。',
-      acts: ['先不用急着决定。', '走一步看一步也可以。'] },
+      alone: ['看不清前面的时候，站一会儿也行。', '没有方向，不代表你走错了。'],
+      acts: ['先不用急着决定。', '走一步看一步也可以。'],
+      questions: ['如果不用考虑别人，你想做什么？', '现在最难决定的是哪一步？'] },
     { id: 'sleep', r: /失眠|睡不着|熬夜|做噩梦|睡不好|惊醒/,
-      alone: '睡不好，白天的情绪更容易崩。',
-      acts: ['闭着眼躺着也算休息。', '别硬逼自己睡。'] }
+      alone: ['睡不好，白天的情绪更容易崩。', '脑子停不下来，是很难睡。'],
+      acts: ['闭着眼躺着也算休息。', '别硬逼自己睡。'],
+      questions: ['是躺下就清醒，还是半夜会醒？', '最近有什么压在心上的事吗？'] }
   ];
 
   var PRAISE_LINES = [
@@ -985,7 +1010,7 @@
   var TOPIC_ADVICE = {
     work: ['先把最急的一件做完，其余明天再说。', '把要问的问清楚，别自己猜。'],
     study: ['先看一遍错在哪，再决定下一步。', '把目标调小一点，先动起来。'],
-    family: ['先别在气头上回话。', '等双方都冷下来，再讲一次。'],
+    family: ['先别在气头上回话。', '把界限讲清楚：哪些事你自己决定。', '等双方都冷下来，再讲一次。'],
     love: ['先说清自己要什么，再决定要不要留。', '先照顾自己，答案晚点给。'],
     friend: ['先把界限说清楚，不必勉强。', '不必为了留住谁而委屈自己。'],
     body: ['先休息或者先看医生，别硬扛。'],
@@ -996,8 +1021,9 @@
     '别一次解决全部，先动最小的一步。', '先把最急的那件拆小一点。',
     '先睡一觉，明天再决定。', '把要说的话写下来，再开口。'
   ];
-  var FOLLOWUPS = ['是今天发生的吗？', '最难受的是哪一段？', '这事憋多久了？', '要不要从最烦的那件说起？'];
-  var SOFT_OPEN = ['嗯，我在听。', '慢慢说，不急。', '我听着。'];
+  var FALLBACK_Q = ['想从哪件事说起？', '今天最不舒服的是哪个瞬间？', '要不要先说最难受的那一段？', '是心里堵，还是身上累？'];
+  var ACKS = ['嗯，我听到了。', '原来是这样。', '我大概明白了。', '嗯，这不容易。'];
+  var SOFT = ['嗯，我在。', '不急，慢慢说。', '我听着。'];
 
   var ENCOURAGE = {
     tired: '你已经很努力了。', sad: '你值得被好好对待。', anxious: '慢慢来，会过去的。',
@@ -1470,7 +1496,10 @@
 
   function scrollChat() {
     var box = $('#chatList');
-    if (box) box.scrollTop = box.scrollHeight;
+    if (!box) return;
+    box.scrollTop = box.scrollHeight;
+    requestAnimationFrame(function () { box.scrollTop = box.scrollHeight; });
+    setTimeout(function () { box.scrollTop = box.scrollHeight; }, 120);
   }
 
   function showTyping() {
@@ -1492,12 +1521,15 @@
     for (var i = 0; i < TOPICS.length; i++) {
       var tp = TOPICS[i];
       if (!tp.r.test(t)) continue;
-      var variants = tp.variants || [];
-      for (var j = 0; j < variants.length; j++) {
-        if (variants[j].r.test(t)) return { id: tp.id, lines: variants[j].lines };
-      }
-      return { id: tp.id, lines: tp.lines };
+      var lines = tp.lines, v = tp.variants || [];
+      for (var j = 0; j < v.length; j++) { if (v[j].r.test(t)) { lines = v[j].lines; break; } }
+      return { id: tp.id, label: tp.label, lines: lines, questions: tp.questions, acts: tp.acts };
     }
+    return null;
+  }
+
+  function detectFeel(t) {
+    for (var i = 0; i < FEELINGS.length; i++) { if (FEELINGS[i].r.test(t)) return FEELINGS[i]; }
     return null;
   }
 
@@ -1506,62 +1538,117 @@
     var pool = arr.filter(function (s) { return recent.indexOf(s) === -1; });
     var out = pick(pool.length ? pool : arr);
     recent.push(out);
-    if (recent.length > 8) recent.shift();
+    if (recent.length > 10) recent.shift();
     return out;
   }
 
-  /* 返回 { texts: [...最多两句], praise: 是否触发表扬 } */
+  var TALK_MEM = {};
+  function talkMem(key) {
+    if (!TALK_MEM[key]) TALK_MEM[key] = { topic: null, feel: null, asked: [], pendingQ: false, turn: 0 };
+    return TALK_MEM[key];
+  }
+
+  function feelLines(f) {
+    return Array.isArray(f.alone) ? f.alone : [f.alone];
+  }
+
+  function nextQuestion(topic, feel, key, st) {
+    var pool = topic ? (topic.questions || []) : (feel ? (feel.questions || []) : []);
+    if (st.timeGiven) {
+      var noTime = pool.filter(function (q) { return !/最近|多久|什么时候|今天|这周/.test(q); });
+      if (noTime.length) pool = noTime;
+    }
+    if (!pool.length) pool = FALLBACK_Q;
+    var fresh = pool.filter(function (q) { return st.asked.indexOf(q) === -1; });
+    var spare = FALLBACK_Q.filter(function (q) { return st.asked.indexOf(q) === -1; });
+    var q;
+    if (fresh.length) q = pick(fresh);
+    else if (spare.length) q = pick(spare);
+    else q = pick(pool.filter(function (x) { return x !== st.lastQ; }).concat(pool));
+    st.lastQ = q;
+    st.asked.push(q);
+    if (st.asked.length > 18) st.asked.shift();
+    return q;
+  }
+
+  /* 多轮对话：记住话题与情绪，接住上一句，再给一句追问或轻建议 */
   function composeReply(text, key) {
     var t = String(text).replace(/\s+/g, ' ').trim();
+    var st = talkMem(key);
     var out = { texts: [], praise: false };
+    st.turn++;
 
     if (/^(你好|您好|在吗|在么|hi|hello|嗨|哈喽)[\s!！。.~？?]*$/i.test(t)) {
       out.texts.push(pick(['我在。', '在的，慢慢说。', '我在，你说。']));
       out.cat = CAT_OF.greet; out.enc = ENCOURAGE.greet;
       return out;
     }
-    if (/^(谢谢|感谢|多谢|辛苦了|辛苦你|好的|嗯+$)/.test(t)) {
-      out.texts.push(pick(['不用谢，你愿意说，我就愿意听。', '这是你应得的。', '嗯，我在。']));
+    if (/^(谢谢|感谢|多谢|辛苦了|辛苦你)/.test(t)) {
+      out.texts.push(pick(['不用谢，你愿意说，我就愿意听。', '嗯，我一直在。']));
       out.cat = CAT_OF.thanks; out.enc = ENCOURAGE.thanks;
       return out;
     }
 
+    var shortReply = /^(嗯+|哦+|哦哦|好吧|行|不知道|不清楚|没有|还好|就那样|算了|随便|没事|没什么|说不清|反正就这样)[。！？.…\s]*$/.test(t);
+
+    if (shortReply) {
+      out.texts.push(pick(st.topic ? ['嗯。', '我在。', '不急。'] : SOFT));
+      out.texts.push(nextQuestion(st.topic, st.feel, key, st));
+      st.pendingQ = true;
+      out.cat = st.feel ? (CAT_OF[st.feel.id] || 'calm') : 'calm';
+      out.enc = ENCOURAGE[st.feel ? st.feel.id : 'default'] || ENCOURAGE.default;
+      return out;
+    }
+
     var topic = matchTopic(t);
-    var feel = null, i;
-    for (i = 0; i < FEELINGS.length; i++) { if (FEELINGS[i].r.test(t)) { feel = FEELINGS[i]; break; } }
+    var feel = detectFeel(t);
 
     var negative = /没通过|没过|没考上|没做到|没成功|未通过|考砸|落榜|失败了|被拒|输了/.test(t);
     if (!negative && /开心|高兴|成功了|成功|做到了|通过了|考上了|升职|加薪|获奖|拿了|录取|赢了|太好了|好棒|第一名|被夸|熬出来/.test(t)) {
       out.praise = true;
       out.texts.push(pickFresh(PRAISE_LINES, key));
-      if (topic && Math.random() < 0.6) out.texts.push('「' + topicLabel(topic.id) + '」这件事，你拿下了。');
+      if (topic && Math.random() < 0.6) out.texts.push('「' + topic.label + '」这件事，你拿下了。');
       out.cat = CAT_OF.praise; out.enc = ENCOURAGE.praise;
+      st.pendingQ = false;
       return out;
     }
 
-    var isQuestion = /怎么办|咋办|该怎么|应该怎么|如何|怎么才能|有什么建议|帮帮我|给点建议/.test(t);
+    if (/这周|上周|昨天|今天|最近|刚过|一直|很久|从.+开始/.test(t)) st.timeGiven = true;
+    if (topic && (!st.topic || st.topic.id !== topic.id)) { st.topic = topic; st.asked = []; }
+    if (feel) st.feel = feel;
 
-    var empathy;
-    if (topic) empathy = pickFresh(topic.lines, key);
-    else if (feel) empathy = feel.alone;
+    var ctxTopic = topic || ((!feel && st.topic && t.length <= 10) ? st.topic : null);
+    var ctxFeel = feel || ((!ctxTopic && st.feel && t.length <= 10) ? st.feel : null);
+    var isQ = /怎么办|咋办|该怎么|应该|如何|怎么才能|建议|帮帮我|要不要/.test(t);
+    var answered = st.pendingQ && !isQ;
+    st.pendingQ = false;
+
+    var first;
+    if (answered && Math.random() < 0.6) first = pickFresh(ACKS, key);
+    else if (ctxFeel && (!ctxTopic || (!topic && Math.random() < 0.5))) first = pickFresh(feelLines(ctxFeel), key);
+    else if (ctxTopic) first = pickFresh(ctxTopic.lines, key);
+    else if (ctxFeel) first = pickFresh(feelLines(ctxFeel), key);
     else {
-var clause = (t.split(/[，。！？、,.!?；;：:\s]+/)[0] || t).trim();
+      var clause = (t.split(/[，。！？、,.!?；;：:\s]+/)[0] || t).trim();
       var quote = clause.length > 12 ? clause.slice(0, 12) : clause;
-      empathy = quote.length >= 3
-        ? '你说的「' + quote + '」，我听进去了。'
-        : pickFresh(SOFT_OPEN, key);
+      first = quote.length >= 3 ? '你说的「' + quote + '」，我听着。' : pickFresh(SOFT, key);
     }
-    out.texts.push(empathy);
+    out.texts.push(first);
 
-    if (isQuestion) {
-      var adv = (topic && TOPIC_ADVICE[topic.id]) ? TOPIC_ADVICE[topic.id] : ADVICE_LINES;
-      out.texts.push(pickFresh(adv, key));
-    } else if (feel) {
-      out.texts.push(pickFresh(feel.acts, key));
-    } else if (topic && Math.random() < 0.45) {
-      out.texts.push(pickFresh(FOLLOWUPS, key));
+    var second;
+    if (isQ) {
+      second = pickFresh(ctxTopic ? (TOPIC_ADVICE[ctxTopic.id] || ADVICE_LINES) : ADVICE_LINES, key);
+    } else if (!answered && ctxFeel && Math.random() < 0.42) {
+      second = pickFresh(ctxFeel.acts, key);
+    } else if (!answered && ctxTopic && Math.random() < 0.18) {
+      second = pickFresh(ctxTopic.acts, key);
+    } else {
+      second = nextQuestion(ctxTopic, ctxFeel, key, st);
+      st.pendingQ = true;
     }
-    var ekey = feel ? feel.id : (topic ? topic.id : encKeyFor(t));
+    out.texts.push(second);
+
+    var ekey = ctxFeel ? ctxFeel.id : (ctxTopic ? ctxTopic.id : encKeyFor(t));
     out.cat = CAT_OF[ekey] || CAT_OF.default;
     out.enc = ENCOURAGE[ekey] || ENCOURAGE.default;
     return out;
